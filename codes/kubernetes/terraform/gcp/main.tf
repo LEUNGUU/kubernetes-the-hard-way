@@ -44,8 +44,8 @@ resource "google_compute_firewall" "external" {
 }
 
 resource "google_compute_address" "extip" {
-  name    = "external-ip"
-  region  = var.region
+  name   = "external-ip"
+  region = var.region
 }
 
 # Compute instances (we use instance template here)
@@ -128,4 +128,49 @@ resource "google_compute_instance" "worker" {
 
   tags = var.worker_node_tags
 
+}
+
+# google external load balancer
+resource "google_compute_http_health_check" "health_check" {
+  name         = "health-check"
+  description  = "Kubernetes Health check"
+  host         = "kubernetes.default.svc.cluster.local"
+  request_path = "/healthz"
+
+  timeout_sec        = 2
+  check_interval_sec = 2
+}
+
+resource "google_compute_firewall" "health_check_rules" {
+  name    = "allow-health-check"
+  network = google_compute_network.vnet.id
+
+  allow {
+    protocol = "tcp"
+  }
+
+  source_ranges = ["209.85.152.0/22", "209.85.204.0/22", "35.191.0.0/16"]
+}
+
+resource "google_compute_target_pool" "target" {
+  name   = "target-pool"
+  region = var.region
+
+  instances = [
+    "${var.zone}/${var.environment}-controller-0",
+    "${var.zone}/${var.environment}-controller-1",
+    "${var.zone}/${var.environment}-controller-2",
+  ]
+
+  health_checks = [
+    google_compute_http_health_check.health_check.name,
+  ]
+}
+
+resource "google_compute_forwarding_rule" "forwarding_rules" {
+  name       = "kubernetes-forwarding-rules"
+  region     = var.region
+  ip_address = google_compute_address.extip.address
+  target     = google_compute_target_pool.target.id
+  port_range = "6443"
 }

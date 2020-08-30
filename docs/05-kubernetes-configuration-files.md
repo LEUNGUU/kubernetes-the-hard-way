@@ -191,7 +191,7 @@ admin.kubeconfig
 ```
 
 
-## 
+##
 
 ## Distribute the Kubernetes Configuration Files
 

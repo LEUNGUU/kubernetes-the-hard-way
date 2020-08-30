@@ -85,3 +85,9 @@ variable "pod_address_prefix" {
   type        = list(string)
   description = "Pod Address Space prefix"
 }
+
+variable "health_check_host" {
+  type        = string
+  description = "Kubernetes domain"
+  default     = "kubernetes.default.svc.cluster.local"
+}
