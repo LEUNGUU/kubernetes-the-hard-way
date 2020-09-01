@@ -1,22 +1,11 @@
 #!/bin/bash
 
-########################
-# Install Clinet Tools #
-########################
-# Only for MacOS (Because I love MacOS)
-brew install cfssl
-brew cask install google-cloud-sdk
-
-if [ ! -f /usr/local/bin/kubectl ]; then
-    curl -o kubectl https://storage.googleapis.com/kubernetes-release/release/v1.18.6/bin/darwin/amd64/kubectl
-    chmod +x kubectl
-    sudo mv kubectl /usr/local/bin/
-fi
 
 ##############################################################################################
 # provision a Certificate Authority that can be used to generate additional TLS certificates #
 ##############################################################################################
 
+function generate-certs() {
 # Generate the CA configuration file, certificate, and private key
 cat > ca-config.json <<EOF
 {
@@ -78,7 +67,7 @@ EOF
 cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile=kubernetes admin-csr.json | cfssljson -bare admin
 
 # create a certificate for each Kubernetes worker node that meets the Node Authorizer requirements
-for instance in kubernetes-worker-0 kubernetes-worker-1 kubernetes-worker-2; do
+for instance in "${WORKER[@]}"; do
 cat > ${instance}-csr.json <<EOF
 {
   "CN": "system:node:${instance}",
@@ -98,17 +87,7 @@ cat > ${instance}-csr.json <<EOF
 }
 EOF
 
-EXTERNAL_IP=$(gcloud compute instances describe ${instance} --format 'value(networkInterfaces[0].accessConfigs[0].natIP)')
-
-INTERNAL_IP=$(gcloud compute instances describe ${instance} --format 'value(networkInterfaces[0].networkIP)')
-
-cfssl gencert \
-  -ca=ca.pem \
-  -ca-key=ca-key.pem \
-  -config=ca-config.json \
-  -hostname=${instance},${EXTERNAL_IP},${INTERNAL_IP} \
-  -profile=kubernetes \
-  ${instance}-csr.json | cfssljson -bare ${instance}
+cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -hostname=${instance},${INTERNAL_IP} -profile=kubernetes ${instance}-csr.json | cfssljson -bare ${instance}
 done
 
 # Generate the kube-controller-manager client certificate and private key
@@ -156,7 +135,6 @@ EOF
 cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile=kubernetes kube-proxy-csr.json | cfssljson -bare kube-proxy
 
 # Generate the kube-scheduler client certificate and private key
-
 cat > kube-scheduler-csr.json <<EOF
 {
   "CN": "system:kube-scheduler",
@@ -179,11 +157,6 @@ EOF
 cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile=kubernetes kube-scheduler-csr.json | cfssljson -bare kube-scheduler
 
 # Generate the Kubernetes API Server certificate and private key
-
-KUBERNETES_PUBLIC_ADDRESS=$(gcloud compute addresses describe external-ip --region $(gcloud config get-value compute/region) --format 'value(address)')
-
-KUBERNETES_HOSTNAMES=kubernetes,kubernetes.default,kubernetes.default.svc,kubernetes.default.svc.cluster,kubernetes.svc.cluster.local
-
 cat > kubernetes-csr.json <<EOF
 {
   "CN": "kubernetes",
@@ -229,12 +202,13 @@ EOF
 cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile=kubernetes service-account-csr.json | cfssljson -bare service-account
 
 # Copy the appropriate certificates and private keys to each worker instance
-for instance in kubernetes-worker-0 kubernetes-worker-1 kubernetes-worker-2; do
+for instance in "${WORKER[@]}"; do
   gcloud compute scp ca.pem ${instance}-key.pem ${instance}.pem ${instance}:~/
 done
 
 # Copy the appropriate certificates and private keys to each controller instance
-for instance in kubernetes-controller-0 kubernetes-controller-1 kubernetes-controller-2; do
-  gcloud compute scp ca.pem ca-key.pem kubernetes-key.pem kubernetes.pem \
-    service-account-key.pem service-account.pem ${instance}:~/
+for instance in "${CONTROLLER[@]}"; do
+  gcloud compute scp ca.pem ca-key.pem kubernetes-key.pem kubernetes.pem service-account-key.pem service-account.pem ${instance}:~/
 done
+
+}
