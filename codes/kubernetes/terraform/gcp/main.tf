@@ -54,6 +54,43 @@ data "google_compute_image" "ubuntu" {
   project = "ubuntu-os-cloud"
 }
 
+resource "google_compute_instance" "bastion" {
+  name           = "bastion"
+  machine_type   = var.vm_size
+  zone           = var.zone
+  can_ip_forward = true
+
+  network_interface {
+    network    = google_compute_network.vnet.self_link
+    subnetwork = google_compute_subnetwork.subnet.name
+    # we dont have enough quota for external ip address
+    access_config {}
+  }
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.ubuntu.self_link
+      size  = var.boot_disk_size
+      type  = var.boot_disk_type
+    }
+  }
+
+  metadata {
+    sshKeys = "centos:${file("/root/.ssh/id_rsa.pub")}"
+  }
+
+  service_account {
+    scopes = var.controller_scopes
+  }
+
+  # resize VM after initial creation
+  allow_stopping_for_update = true
+
+  description = "bastion"
+
+  tags = ["bastion"]
+
+}
 resource "google_compute_instance" "controller" {
   count          = var.controller_count
   name           = "${var.environment}-controller-${count.index}"
@@ -75,6 +112,10 @@ resource "google_compute_instance" "controller" {
       size  = var.boot_disk_size
       type  = var.boot_disk_type
     }
+  }
+
+  metadata {
+    sshKeys = "centos:${file("/root/.ssh/id_rsa.pub")}"
   }
 
   service_account {
@@ -115,6 +156,7 @@ resource "google_compute_instance" "worker" {
 
   metadata = {
     pod-cidr = element(var.pod_address_prefix, count.index)
+    sshKeys = "centos:${file("/root/.ssh/id_rsa.pub")}"
   }
 
   service_account {

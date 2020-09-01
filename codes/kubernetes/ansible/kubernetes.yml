@@ -1,2 +1,10 @@
-- hosts: {{ target_hosts }}
+---
+- hosts: kubernetes-controller
+  roles:
+      - install_etcd
+      - install_control_plane
+
+- hosts: kubernetes-worker
+  roles:
+      - install_worker_nodes
 
