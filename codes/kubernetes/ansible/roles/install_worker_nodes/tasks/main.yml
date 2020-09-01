@@ -28,7 +28,7 @@
 
 - name: install kubectl, kube-proxy, kubelet
   get_url:
-    url: {{ kubernetes_url }}/{{ item }}
+    url: "{{ kubernetes_url }}/{{ item }}"
     dest: /usr/local/bin/{{ item }}
     mode: '0755'
   with_items:

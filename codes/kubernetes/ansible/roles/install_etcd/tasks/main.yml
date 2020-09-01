@@ -17,9 +17,10 @@
 
 - name: Copy certificates to destination
   copy:
-    src: {{ item }}
+    src: "{{ item }}"
     dest: /etc/etcd/{{ item }}
     mode: '0644'
+    remote_src: yes
   with_items:
     - ca.pem
     - kubernetes.pem

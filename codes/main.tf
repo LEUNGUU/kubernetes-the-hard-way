@@ -1,8 +1,8 @@
 module "kubernetes" {
   source               = "./kubernetes/terraform/gcp"
   environment          = "kubernetes"
-  region               = "us-west1"
-  zone                 = "us-west1-b"
+  region               = var.region
+  zone                 = var.zone
   address_prefix       = "10.240.0.0/24"
   internal_cidr        = ["10.240.0.0/24", "10.200.0.0/16"]
   external_cidr        = ["0.0.0.0/0"]

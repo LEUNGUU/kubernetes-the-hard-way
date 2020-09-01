@@ -4,7 +4,7 @@
 # Generating the Data Encryption Config and Key #
 #################################################
 
-function generate_encryption() {
+function generate-encryption() {
 
   ENCRYPTION_KEY=$(head -c 32 /dev/urandom | base64)
   cat > encryption-config.yaml <<EOF

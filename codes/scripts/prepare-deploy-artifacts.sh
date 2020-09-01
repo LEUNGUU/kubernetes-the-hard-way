@@ -22,6 +22,14 @@ export INTERNAL_IP=$(gcloud compute instances describe ${instance} --format 'val
 # Main workflow
 function main() {
 
+# check if environment variable exist.
+if [ -z ${TF_VAR_region+x} ]; then echo "TF_VAR_region is not set"; exit 1; fi
+if [ -z ${TF_VAR_zone+x} ]; then echo "TF_VAR_zone is not set"; exit 1; fi
+if [ -z ${GOOGLE_ACCOUNT_NAME+x} ]; then echo "GOOGLE_ACCOUNT_NAME is not set"; exit 1; fi
+if [ -z ${GOOGLE_KEY_FILE+x} ]; then echo "GOOGLE_KEY_FILE is not set"; exit 1; fi
+if [ -z ${GOOGLE_DEFAULT_PROJECT+x} ]; then echo "GOOGLE_DEFAULT_PROJECT is not set"; exit 1; fi
+
+
 ########################
 # Install Clinet Tools #
 ########################
@@ -29,8 +37,9 @@ function main() {
 # brew install cfssl
 # brew cask install google-cloud-sdk
 # install google-cloud
-google_sdk=$(which glcoud)
-if [ ! -f $google_sdk ]; then
+which glcoud
+RC=${PIPESTATUS[0]}
+if [ ${RC} -ne 0 ]; then
     wget https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-307.0.0-linux-x86_64.tar.gz
     tar -zxf google-cloud-sdk-*
     ./google-cloud-sdk/install.sh
@@ -46,10 +55,18 @@ if [ ! -f /usr/local/bin/cfssl ]; then
 fi
 
 if [ ! -f /usr/local/bin/kubectl ]; then
-    curl -o kubectl https://storage.googleapis.com/kubernetes-release/release/v1.18.6/bin/darwin/amd64/kubectl
+    curl -LO "https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl"
     chmod +x kubectl
     mv kubectl /usr/local/bin/
 fi
+
+# gcloud login
+gcloud auth activate-service-account $GOOGLE_ACCOUNT_NAME --key-file=$GOOGLE_KEY_FILE
+
+# set region and zone
+gcloud config set compute/region $TF_VAR_region
+gcloud config set compute/zone $TF_VAR_zone
+gcloud config set project $GOOGLE_DEFAULT_PROJECT
 
 generate-certs
 generate-kubeconfig
