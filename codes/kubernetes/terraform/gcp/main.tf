@@ -75,7 +75,7 @@ resource "google_compute_instance" "bastion" {
     }
   }
 
-  metadata {
+  metadata = {
     sshKeys = "centos:${file("/root/.ssh/id_rsa.pub")}"
   }
 
@@ -114,7 +114,7 @@ resource "google_compute_instance" "controller" {
     }
   }
 
-  metadata {
+  metadata = {
     sshKeys = "centos:${file("/root/.ssh/id_rsa.pub")}"
   }
 
