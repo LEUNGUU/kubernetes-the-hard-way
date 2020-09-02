@@ -1,13 +1,16 @@
 ---
 
-- name: Download etcd packages
+- name: download etcd packages
   unarchive:
     src: https://github.com/etcd-io/etcd/releases/download/v3.4.10/etcd-v3.4.10-linux-amd64.tar.gz
-    dest: /usr/local/bin
+    dest: /tmp
     remote_src: yes
   environment:
     http_proxy: "{{ http_proxy | default('') }}"
     https_proxy: "{{ https_proxy | default('') }}"
+
+- name: move etcd to local/bin
+  command: mv /tmp/etcd-v3.4.10-linux-amd64/etcd* /usr/local/bin/
 
 - name: create related folders for etcd
   file:
@@ -18,7 +21,7 @@
     - /etc/etcd
     - /var/lib/etcd
 
-- name: Copy certificates to destination
+- name: copy certificates to destination
   copy:
     src: /root/{{ item }}
     dest: /etc/etcd/{{ item }}
@@ -29,7 +32,7 @@
     - kubernetes.pem
     - kubernetes-key.pem
 
-- name: Distribute Configurations
+- name: distribute Configurations
   template:
     src: etcd.service.j2
     dest: /etc/systemd/system/etcd.service
