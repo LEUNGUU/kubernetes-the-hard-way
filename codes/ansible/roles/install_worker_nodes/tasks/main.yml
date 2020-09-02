@@ -11,7 +11,6 @@
 
 - name: disable swap
   command: swapoff -a
-  become: yes
 
 - name: Create folders
   file:
@@ -99,9 +98,9 @@
 # Configure kubelet
 - name: move certificates and config to the right place
   shell: |
-      sudo mv {{ ansible_hostname }}-key.pem {{ ansible_hostname }}.pem /var/lib/kubelet/
-      sudo mv {{ ansible_hostname }}.kubeconfig /var/lib/kubelet/kubeconfig
-      sudo mv ca.pem /var/lib/kubernetes/
+      sudo mv /root/{{ ansible_hostname }}-key.pem /root/{{ ansible_hostname }}.pem /var/lib/kubelet/
+      sudo mv /root/{{ ansible_hostname }}.kubeconfig /var/lib/kubelet/kubeconfig
+      sudo mv /root/ca.pem /var/lib/kubernetes/
   executable: /bin/bash
 
 # kubelet config
@@ -119,7 +118,7 @@
 
 # kube-proxy
 - name: move kube-proxy.kubeconfig to right place
-  command: sudo mv kube-proxy.kubeconfig /var/lib/kube-proxy/kubeconfig
+  command: sudo mv /root/kube-proxy.kubeconfig /var/lib/kube-proxy/kubeconfig
 
 - name: kube-proxy-config.yaml
   template:

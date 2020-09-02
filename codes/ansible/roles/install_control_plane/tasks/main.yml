@@ -26,7 +26,7 @@
 
 - name: Copy certificates
   copy:
-    src: "{{ item }}"
+    src: /root/{{ item }}
     dest: /var/lib/kubernetes/{{ item }}
     remote_src: yes
   with_items:
@@ -47,7 +47,7 @@
 # Configure Kubernetes Controller Manager #
 - name: Distribute Controller Config
   copy:
-    src: kube-controller-manager.kubeconfig
+    src: /root/kube-controller-manager.kubeconfig
     dest: /etc/systemd/system/kube-controller-manager.kubeconfig
     remote_src: yes
 
@@ -59,7 +59,7 @@
 # Configure Kubernetes Scheduler #
 - name: kube-scheduler.kubeconfig
   copy:
-    src: kube-scheduler.kubeconfig
+    src: /root/kube-scheduler.kubeconfig
     dest: /var/lib/kubernetes/kube-scheduler.kubeconfig
     remote_src: yes
 

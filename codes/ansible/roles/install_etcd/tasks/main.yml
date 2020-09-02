@@ -20,7 +20,7 @@
 
 - name: Copy certificates to destination
   copy:
-    src: "{{ item }}"
+    src: /root/{{ item }}
     dest: /etc/etcd/{{ item }}
     mode: '0644'
     remote_src: yes

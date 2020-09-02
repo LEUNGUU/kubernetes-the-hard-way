@@ -1,12 +1,12 @@
 [bastion]
 ${bastion}
 
-[kubernetes-controller]
+[kubernetes_controller]
 ${kubernetes-controller}
 
-[kubernetes-worker]
+[kubernetes_worker]
 ${kubernetes-worker}
 
 [kubernetes:children]
-kubernetes-controller
-kubernetes-worker
+kubernetes_controller
+kubernetes_worker
