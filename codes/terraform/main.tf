@@ -1,5 +1,5 @@
 module "kubernetes" {
-  source               = "./kubernetes/terraform/gcp"
+  source               = "./kubernetes/"
   environment          = "kubernetes"
   region               = var.region
   zone                 = var.zone

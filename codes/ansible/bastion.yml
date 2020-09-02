@@ -1,0 +1,12 @@
+---
+- hosts: bastion
+  tasks:
+    - name: Install squid software on target hosts.
+      apt: name=squid state=latest update_cache=yes
+    - name: allow localnet to access squid
+      lineinfile:
+        path: /etc/squid/conf.d/debian.conf
+        regexp: '^#http_access'
+        line: http_access allow localnet
+    - systemd: name=squid state=restarted enabled=yes
+

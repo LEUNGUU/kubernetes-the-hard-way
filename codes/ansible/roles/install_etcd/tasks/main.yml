@@ -5,6 +5,9 @@
     src: https://github.com/etcd-io/etcd/releases/download/v3.4.10/etcd-v3.4.10-linux-amd64.tar.gz
     dest: /usr/local/bin
     remote_src: yes
+  environment:
+    http_proxy: "{{ http_proxy | default('') }}"
+    https_proxy: "{{ https_proxy | default('') }}"
 
 - name: create related folders for etcd
   file:

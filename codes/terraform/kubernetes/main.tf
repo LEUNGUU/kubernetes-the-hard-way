@@ -184,7 +184,7 @@ resource "google_compute_http_health_check" "health_check" {
 }
 
 resource "google_compute_firewall" "health_check_rules" {
-  name    = "allow-health-check"
+  name    = "health-check-rule"
   network = google_compute_network.vnet.id
 
   allow {
@@ -210,7 +210,7 @@ resource "google_compute_target_pool" "target" {
 }
 
 resource "google_compute_forwarding_rule" "forwarding_rules" {
-  name       = "kubernetes-forwarding-rules"
+  name       = "forwarding-rule"
   region     = var.region
   ip_address = google_compute_address.extip.address
   target     = google_compute_target_pool.target.id
