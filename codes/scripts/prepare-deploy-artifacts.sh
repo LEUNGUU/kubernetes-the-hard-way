@@ -5,8 +5,9 @@ source generate-cert.sh
 source generate-encryption.sh
 source generate-kubeconfig.sh
 
+function prepare_env() {
 # machine list
-export CONTROLLER=(kubernetes-worker-0 kubernetes-worker-1 kubernetes-worker-2)
+export CONTROLLER=(kubernetes-controller-0 kubernetes-controller-1 kubernetes-controller-2)
 export WORKER=(kubernetes-worker-0 kubernetes-worker-1 kubernetes-worker-2)
 
 # Get Kubernetes Public ip
@@ -16,7 +17,7 @@ export KUBERNETES_HOSTNAMES=kubernetes,kubernetes.default,kubernetes.default.svc
 
 # we do not have extenal ip here due to not enough quota
 # EXTERNAL_IP=$(gcloud compute instances describe ${instance} --format 'value(networkInterfaces[0].accessConfigs[0].natIP)')
-export INTERNAL_IP=$(gcloud compute instances describe ${instance} --format 'value(networkInterfaces[0].networkIP)')
+}
 
 
 # Main workflow
@@ -40,9 +41,11 @@ if [ -z ${GOOGLE_DEFAULT_PROJECT+x} ]; then echo "GOOGLE_DEFAULT_PROJECT is not 
 which glcoud
 RC=${PIPESTATUS[0]}
 if [ ${RC} -ne 0 ]; then
-    wget https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-307.0.0-linux-x86_64.tar.gz
-    tar -zxf google-cloud-sdk-*
-    ./google-cloud-sdk/install.sh
+    if [ ! -f  google-cloud-sdk-307.0.0-linux-x86_64.tar.gz ]; then
+        wget https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-307.0.0-linux-x86_64.tar.gz
+        tar -zxf google-cloud-sdk-*
+        ./google-cloud-sdk/install.sh
+    fi
     source $HOME/.bashrc
 fi
 
@@ -67,6 +70,9 @@ gcloud auth activate-service-account $GOOGLE_ACCOUNT_NAME --key-file=$GOOGLE_KEY
 gcloud config set compute/region $TF_VAR_region
 gcloud config set compute/zone $TF_VAR_zone
 gcloud config set project $GOOGLE_DEFAULT_PROJECT
+
+# prepare environment variables after installing gcloud correctly
+prepare_env
 
 generate-certs
 generate-kubeconfig

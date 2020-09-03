@@ -12,7 +12,7 @@
 - name: Download and Install kubernetes controller binaries
   get_url:
     url: "{{ item }}"
-    dest: /usr/local/bin/{{ item }}
+    dest: /usr/local/bin/
     mode: '0755'
   with_items:
     - https://storage.googleapis.com/kubernetes-release/release/v1.18.6/bin/linux/amd64/kube-apiserver
@@ -48,7 +48,7 @@
 - name: Distribute Controller Config
   copy:
     src: /root/kube-controller-manager.kubeconfig
-    dest: /etc/systemd/system/kube-controller-manager.kubeconfig
+    dest: /var/lib/kubernetes/kube-controller-manager.kubeconfig
     remote_src: yes
 
 - name: Distribute Kube Controller Manager
@@ -85,6 +85,9 @@
   apt:
     name: nginx
     state: present
+  environment:
+    http_proxy: "{{ http_proxy | default('') }}"
+    https_proxy: "{{ https_proxy | default('') }}"
 
 - name: Nginx Configurations
   template:

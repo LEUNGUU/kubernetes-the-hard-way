@@ -10,13 +10,14 @@
     https_proxy: "{{ https_proxy | default('') }}"
 
 - name: move etcd to local/bin
-  command: mv /tmp/etcd-v3.4.10-linux-amd64/etcd* /usr/local/bin/
+  shell:
+    cmd: mv /tmp/etcd-v3.4.10-linux-amd64/* /usr/local/bin/
 
 - name: create related folders for etcd
   file:
     path: "{{ item }}"
     state: directory
-    mode: 700
+    mode: '0700'
   with_items:
     - /etc/etcd
     - /var/lib/etcd

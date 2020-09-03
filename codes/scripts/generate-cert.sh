@@ -87,6 +87,8 @@ cat > ${instance}-csr.json <<EOF
 }
 EOF
 
+INTERNAL_IP=$(gcloud compute instances describe ${instance}  --format 'value(networkInterfaces[0].networkIP)')
+
 cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -hostname=${instance},${INTERNAL_IP} -profile=kubernetes ${instance}-csr.json | cfssljson -bare ${instance}
 done
 
