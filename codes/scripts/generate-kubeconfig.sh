@@ -6,7 +6,8 @@
 
 function generate-kubeconfig() {
 # kubelets Configuration File
-for instance in "${CONTROLLER[@]}"; do
+for instance in "${WORKER[@]}"; do
+echo ${KUBERNETES_PUBLIC_ADDRESS}
   kubectl config set-cluster kubernetes-the-hard-way \
     --certificate-authority=ca.pem \
     --embed-certs=true \

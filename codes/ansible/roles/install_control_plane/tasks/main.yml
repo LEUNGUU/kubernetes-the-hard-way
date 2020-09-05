@@ -79,6 +79,16 @@
   systemd:
     daemon_reload: yes
 
+- name: start kubernetes controller service
+  systemd:
+    name: "{{ item }}"
+    state: started
+    enabled: yes
+  with_items:
+    - kube-apiserver
+    - kube-controller-manager
+    - kube-scheduler
+
 
 # install nginx
 - name: Install nginx
@@ -100,4 +110,9 @@
     dest: /etc/nginx/sites-enabled/kubernetes.default.svc.cluster.local
     state: link
 
+- name: restart nginx
+  systemd:
+    name: nginx
+    state: restarted
+    enabled: yes
 

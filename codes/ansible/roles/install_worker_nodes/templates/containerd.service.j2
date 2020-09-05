@@ -4,6 +4,7 @@ Documentation=https://containerd.io
 After=network.target
 
 [Service]
+EnvironmentFile=-/etc/systemd/system/containerd.env
 ExecStartPre=/sbin/modprobe overlay
 ExecStart=/bin/containerd
 Restart=always

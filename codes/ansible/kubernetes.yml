@@ -1,8 +1,8 @@
 ---
-# - hosts: kubernetes_controller
-#   roles:
-      # - install_etcd
-      # - install_control_plane
+#- hosts: kubernetes_controller
+#  roles:
+#      - install_etcd
+#      - install_control_plane
 
 - hosts: kubernetes_worker
   roles:

@@ -43,3 +43,9 @@
 - name: reload systemd service
   systemd:
     daemon_reload: yes
+
+- name: start etcd service
+  systemd:
+    name: etcd
+    state: started
+    enabled: yes

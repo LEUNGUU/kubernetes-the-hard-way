@@ -1,88 +1,88 @@
 ---
 
-#- name: install required packages
-#  apt:
-#    name: ['socat', 'conntrack', 'ipset']
-#    state: present
-#  environment:
-#    http_proxy: "{{ http_proxy | default('') }}"
-#    https_proxy: "{{ https_proxy | default('') }}"
-#
-#- name: disable swap
-#  command: swapoff -a
-#
-#- name: Create folders
-#  file:
-#    path: "{{ item }}"
-#    state: directory
-#    mode: "0755"
-#  with_items:
-#    - /etc/cni/net.d
-#    - /opt/cni/bin
-#    - /var/lib/kubelet
-#    - /var/lib/kube-proxy
-#    - /var/lib/kubernetes
-#    - /var/run/kubernetes
-#
-#- name: install kubectl, kube-proxy, kubelet
-#  get_url:
-#    url: "{{ kubernetes_url }}/{{ item }}"
-#    dest: /usr/local/bin/
-#    mode: '0755'
-#  with_items:
-#    - kubectl
-#    - kube-proxy
-#    - kubelet
-#  environment:
-#    http_proxy: "{{ http_proxy | default('') }}"
-#    https_proxy: "{{ https_proxy | default('') }}"
-#
-#- name: install crictl
-#  unarchive:
-#    src: https://github.com/kubernetes-sigs/cri-tools/releases/download/v1.18.0/crictl-v1.18.0-linux-amd64.tar.gz
-#    dest: /usr/local/bin
-#    remote_src: yes
-#  environment:
-#    http_proxy: "{{ http_proxy | default('') }}"
-#    https_proxy: "{{ https_proxy | default('') }}"
-#
-#- name: install cni-plugins
-#  unarchive:
-#    src: https://github.com/containernetworking/plugins/releases/download/v0.8.6/cni-plugins-linux-amd64-v0.8.6.tgz
-#    dest: /opt/cni/bin
-#    remote_src: yes
-#  environment:
-#    http_proxy: "{{ http_proxy | default('') }}"
-#    https_proxy: "{{ https_proxy | default('') }}"
-#
-#- name: install runc
-#  get_url:
-#    url: https://github.com/opencontainers/runc/releases/download/v1.0.0-rc91/runc.amd64
-#    dest: /usr/local/bin/runc
-#    mode: '0755'
-#    remote_src: yes
-#  environment:
-#    http_proxy: "{{ http_proxy | default('') }}"
-#    https_proxy: "{{ https_proxy | default('') }}"
-#
-#- name: create a folders to extract containerd
-#  file:
-#    path: /tmp/containerd
-#    state: directory
-#    mode: '0755'
-#
-#- name: install containerd
-#  unarchive:
-#    src: https://github.com/containerd/containerd/releases/download/v1.3.6/containerd-1.3.6-linux-amd64.tar.gz
-#    dest: /tmp/containerd
-#    remote_src: yes
-#  environment:
-#    http_proxy: "{{ http_proxy | default('') }}"
-#    https_proxy: "{{ https_proxy | default('') }}"
+- name: install required packages
+  apt:
+    name: ['socat', 'conntrack', 'ipset']
+    state: present
+  environment:
+    http_proxy: "{{ http_proxy | default('') }}"
+    https_proxy: "{{ https_proxy | default('') }}"
 
-#- name: move containerd/bin to /bin/
-#  shell:
-#    cmd: mv /tmp/containerd/bin/* /bin/
+- name: disable swap
+  command: swapoff -a
+
+- name: Create folders
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+  with_items:
+    - /etc/cni/net.d
+    - /opt/cni/bin
+    - /var/lib/kubelet
+    - /var/lib/kube-proxy
+    - /var/lib/kubernetes
+    - /var/run/kubernetes
+
+- name: install kubectl, kube-proxy, kubelet
+  get_url:
+    url: "{{ kubernetes_url }}/{{ item }}"
+    dest: /usr/local/bin/
+    mode: '0755'
+  with_items:
+    - kubectl
+    - kube-proxy
+    - kubelet
+  environment:
+    http_proxy: "{{ http_proxy | default('') }}"
+    https_proxy: "{{ https_proxy | default('') }}"
+
+- name: install crictl
+  unarchive:
+    src: https://github.com/kubernetes-sigs/cri-tools/releases/download/v1.18.0/crictl-v1.18.0-linux-amd64.tar.gz
+    dest: /usr/local/bin
+    remote_src: yes
+  environment:
+    http_proxy: "{{ http_proxy | default('') }}"
+    https_proxy: "{{ https_proxy | default('') }}"
+
+- name: install cni-plugins
+  unarchive:
+    src: https://github.com/containernetworking/plugins/releases/download/v0.8.6/cni-plugins-linux-amd64-v0.8.6.tgz
+    dest: /opt/cni/bin
+    remote_src: yes
+  environment:
+    http_proxy: "{{ http_proxy | default('') }}"
+    https_proxy: "{{ https_proxy | default('') }}"
+
+- name: install runc
+  get_url:
+    url: https://github.com/opencontainers/runc/releases/download/v1.0.0-rc91/runc.amd64
+    dest: /usr/local/bin/runc
+    mode: '0755'
+    remote_src: yes
+  environment:
+    http_proxy: "{{ http_proxy | default('') }}"
+    https_proxy: "{{ https_proxy | default('') }}"
+
+- name: create a folders to extract containerd
+  file:
+    path: /tmp/containerd
+    state: directory
+    mode: '0755'
+
+- name: install containerd
+  unarchive:
+    src: https://github.com/containerd/containerd/releases/download/v1.3.6/containerd-1.3.6-linux-amd64.tar.gz
+    dest: /tmp/containerd
+    remote_src: yes
+  environment:
+    http_proxy: "{{ http_proxy | default('') }}"
+    https_proxy: "{{ https_proxy | default('') }}"
+
+- name: move containerd/bin to /bin/
+  shell:
+    cmd: mv /tmp/containerd/bin/* /bin/
 
 
 - name: get google pod cidr
@@ -123,6 +123,11 @@
     src: containerd.service.j2
     dest: /etc/systemd/system/containerd.service
 
+- name: containerd env
+  template:
+    src: containerd.env.j2
+    dest: /etc/systemd/system/containerd.env
+
 # Configure kubelet
 - name: move certificates and config to the right place
   shell: |
@@ -145,9 +150,14 @@
     dest: /etc/systemd/system/kubelet.service
     mode: '0755'
 
+- name: kubelet env
+  template:
+    src: kubelet.env.j2
+    dest: /etc/systemd/system/kubelet.env
+
 # kube-proxy
-#- name: move kube-proxy.kubeconfig to right place
-#  command: cp /root/kube-proxy.kubeconfig /var/lib/kube-proxy/kubeconfig
+- name: move kube-proxy.kubeconfig to right place
+  command: cp /root/kube-proxy.kubeconfig /var/lib/kube-proxy/kubeconfig
 
 - name: kube-proxy-config.yaml
   template:
@@ -159,6 +169,11 @@
     src: kube-proxy.service.j2
     dest: /etc/systemd/system/kube-proxy.service
     mode: '0755'
+
+- name: kube-proxy env
+  template:
+    src: kube-proxy.env.j2
+    dest: /etc/systemd/system/kube-proxy.env
 
 - name: reload system services
   systemd:

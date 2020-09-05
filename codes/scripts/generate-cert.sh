@@ -88,8 +88,9 @@ cat > ${instance}-csr.json <<EOF
 EOF
 
 INTERNAL_IP=$(gcloud compute instances describe ${instance}  --format 'value(networkInterfaces[0].networkIP)')
+PROXY_IP=$(gcloud compute instances describe bastion --format 'value(networkInterfaces[0].accessConfigs[0].natIP)')
 
-cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -hostname=${instance},${INTERNAL_IP} -profile=kubernetes ${instance}-csr.json | cfssljson -bare ${instance}
+cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -hostname=${instance},${INTERNAL_IP},${PROXY_IP} -profile=kubernetes ${instance}-csr.json | cfssljson -bare ${instance}
 done
 
 # Generate the kube-controller-manager client certificate and private key

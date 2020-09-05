@@ -5,6 +5,7 @@ After=containerd.service
 Requires=containerd.service
 
 [Service]
+EnvironmentFile=-/etc/systemd/system/kubelet.env
 ExecStart=/usr/local/bin/kubelet \
   --config=/var/lib/kubelet/kubelet-config.yaml \
   --container-runtime=remote \
